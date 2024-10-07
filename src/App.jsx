@@ -1,5 +1,4 @@
-/* import AmyRobson from "./assets/images/avatars/image-amyrobson.png" */
-import IconReply from "./components/icons/iconReply.jsx"
+
 import CommentSection from "./components/CommentSection/CommentSection.jsx"
 
 /* 
