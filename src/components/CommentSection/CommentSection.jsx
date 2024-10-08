@@ -3,14 +3,23 @@ import commentsData from "@/components/CommentSection/data.json";
 
 import IconReply from "@/components/icons/iconReply.jsx"
 import ScoreComment from "@/components/CommentSection/ScoreComment.jsx";
-import { comment } from "postcss";
+
 import CommentReply from "./CommentReply";
+
+/* 
+Cosas por resolver
+Que aparezca y desaparezca el cuadro de texto si hay clic fuera del cuadro(de ley) o si vuelve a presionar reply (opcional)
+Que las respuestas aparezcan arriba del cuadro de text(opcional)
+Programar el botón eliminar y agregar su reenderizado a los comentarios nuevos( de ley)
+
+*/
 
 const CommentSection = () => {
     const [comments, setComments] = useState([]);
     const [hoverId, setHoverId] = useState();
     const [count, setCount] = useState({});
-    const [replyTo, setReplyTo] = useState(null);
+    const [replyTo, setReplyTo] = useState(false);
+
 
     useEffect(() => {
         setComments(commentsData.comments);
@@ -38,11 +47,47 @@ const CommentSection = () => {
     const mainAvatar = comments.flatMap(comment => comment.replies).find(reply => reply.id === 4)
     const replyAvatar = mainAvatar ? mainAvatar.user.image.png : " rounder-full border"
 
+    const addComment = (content, parentId) => {
+        if (content.trim()) {
+
+            const newCommentData = {
+                id: Date.now(),
+                content: content,
+                createdAt: "just now",
+                score: 0,
+                replyingTo: "user",
+                user: {
+                    image: { png: replyAvatar },
+                    username: "you"
+                },
+                replies: []
+            };
+
+            setComments(prev => {
+                if (parentId) {
+                    return prev.map(comment => {
+                        if (comment.id === parentId) {
+                            return {
+                                ...comment,
+                                replies: [...comment.replies, newCommentData]
+                            }
+                        }
+                        return comment;
+                    })
+                }
+                return [...prev, newCommentData];
+            })
+        }
+
+
+    }
+
+
     return (
         <>
             {comments.map(comment => (
-                <div key={comment.id}>
-                    <div className="bg-white min-h-[240px] w-[350px] md:w-[700px] mx-auto rounded-xl">
+                <div key={comment.id} className="">
+                    <div className="bg-white min-h-[160px] w-[350px] md:w-[700px] mx-auto md:mx-auto rounded-xl ">
                         <div className="mx-4 mt-4">
                             <div className="pt-4 pb-4">
                                 <div className="flex items-center justify-between  gap-x-4">
@@ -74,18 +119,11 @@ const CommentSection = () => {
                         </div>
                     </div>
                     {replyTo === comment.id && (
-                        <div className="flex flex-col bg-white justify-center rounded-lg h-[160px] mx-auto w-[365px] md:w-[700px] my-3 gap-y-4 ">
-                            <form action="" className="flex items-center justify-center w-50">
-                                <textarea name="" id="" placeholder="Write here..." className="border border-1 border-gray-400 rounded-md w-[331px] focus:outline-none resize-none"></textarea>
-                            </form>
-                            <div className="flex items-center justify-between border border-blue-600 mx-4">
-
-                                <img src={replyAvatar} alt="" className="w-10 h-10" />
-                                <button className="rounded-md bg-moderate-blue text-white h-[40px] w-[80px]">
-                                    <p>Send</p>
-                                </button>
+                        <span className=" bg-gray-300 w-[1px] min-h-[160px] md:-ml-2">
+                            <div className="flex flex-col bg-white justify-center rounded-lg h-[160px] mx-auto w-[350px] md:w-[700px] mt-4">
+                                <CommentReply replyAvatar={replyAvatar} id="replyComment" isReply={true} onSend={addComment} parentId={comment.id} />
                             </div>
-                        </div>
+                        </span>
                     )
 
                     }
@@ -98,8 +136,8 @@ const CommentSection = () => {
                                     <div>
                                         <div key={reply.id} className="flex mx-4  items-center justify-between ">
                                             {/* <hr className=" bg-gray-300 w-[1px] min-h-[240px] " /> */}
-                                            <span className=" bg-gray-300 w-[1px] min-h-[200px] md:-ml-2">
-                                                <div className="bg-white min-h-[200px] md:min-h-[200px] w-[320px] md:w-[600px] rounded-xl my-4 mb-1 ml-4 md:ml-[90px]">
+                                            <span className=" bg-gray-300 w-[1px] min-h-[160px] md:-ml-2">
+                                                <div className="bg-white min-h-[200px] md:min-h-[200px] w-[330px] md:w-[600px] rounded-xl my-4 mb-1 ml-4 md:ml-[90px]">
                                                     <div className="pt-4 pb-4 mx-4 "
                                                         onMouseEnter={() => setHoverId(reply.id)}
                                                         onMouseLeave={() => setHoverId(null)}>
@@ -141,8 +179,13 @@ const CommentSection = () => {
                                                 </div>
                                                 {replyTo === reply.id && (
 
-                                                    <div className="bg-white rounded-lg  mt-4 w-[600px] ml-[90px] mb-4">
-                                                        <CommentReply replyAvatar={replyAvatar} />
+                                                    <div className="bg-white rounded-lg  min-h-[160px] mt-4 w-[330px] md:w-[600px] ml-4 md:ml-[90px]">
+                                                        <CommentReply
+                                                            replyAvatar={replyAvatar} id="replyReplies"
+                                                            isReply={true}
+                                                            onSend={addComment}
+                                                            parentId={comment.id}
+                                                        />
                                                     </div>
                                                 )}
                                             </span>
@@ -160,8 +203,14 @@ const CommentSection = () => {
 
             }
 
-            <div className="flex flex-col bg-white justify-center rounded-lg h-[160px] mx-auto w-[365px] md:w-[700px] my-0 z-10">
-                <CommentReply replyAvatar={replyAvatar} text="Send" />
+            <div className="flex flex-col bg-white justify-center rounded-lg h-[160px] mx-auto w-[355px] md:w-[700px] my-1 ">
+                <CommentReply
+                    replyAvatar={replyAvatar}
+                    id="replyComment"
+                    isReply={false}
+                    onSend={addComment}
+                    parentId={null}
+                />
             </div>
         </>
     )
