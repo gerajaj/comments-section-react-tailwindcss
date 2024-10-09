@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+
 const CommentReply = ({ replyAvatar, onSend, isReply, parentId }) => {
 
     const [addNewComment, setAddNewComment] = useState("");
@@ -11,7 +12,7 @@ const CommentReply = ({ replyAvatar, onSend, isReply, parentId }) => {
     }
 
     return (
-        <div className="pt-4 mt-4 order-2">
+        <div className="grid pt-4 mt-4 order-2">
             <form action="" className="flex items-center justify-center w-50">
                 <textarea
                     name=""
@@ -24,6 +25,7 @@ const CommentReply = ({ replyAvatar, onSend, isReply, parentId }) => {
             <div className="flex items-center justify-between mx-4 mt-4 pb-4">
 
                 <img src={replyAvatar} alt="" className="w-10 h-10" />
+
                 <button
                     type="submit"
                     onClick={handleSend}
