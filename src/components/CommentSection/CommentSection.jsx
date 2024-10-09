@@ -153,7 +153,7 @@ const CommentSection = () => {
                     <div className="flex text-slate-950 dark:text-white font-bold gap-x-4">
 
                         <p><a href="https://github.com/gerajaj" target="_blank" title="Visit my Github profile">About</a></p>
-                        <p className=""><a href="#" target="_blank" title="Go to Repository">Repo</a></p>
+                        <p className=""><a href="https://github.com/gerajaj/comments-section-react-tailwindcss" target="_blank" title="Go to Repository">Repo</a></p>
                     </div>
                     <button onClick={handleChangeTheme} title="Change theme">
                         {theme === "dark" ? (<img src={IconSun} className="h-6 mx-auto fill-bold rounded-full" />) : (<img src={IconMoon} className="h-6 mx-auto fill-bold" />)}
