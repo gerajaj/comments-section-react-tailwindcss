@@ -9,13 +9,6 @@ import ScoreComment from "@/components/CommentSection/ScoreComment.jsx";
 import CommentReply from "./CommentReply";
 import DeleteComments from "./DeleteComments";
 
-/* 
-Cosas por resolver:
-    Para cumplir con el desafío:
-        
-    Retos:
-        Vista dark/light (opcional).
-*/
 
 const CommentSection = () => {
     const [comments, setComments] = useState([]);
@@ -74,17 +67,43 @@ const CommentSection = () => {
     const replyAvatar = currentUser ? currentUser.image.png : " rounder-full border"
 
     const addComment = (content, parentId) => {
+
+        let replyingToUsername = "";
+
         if (content.trim()) {
+            if (parentId) {
+
+                const parentComment = comments.find(comment => comment.id === parentId)
+                if (parentComment) {
+
+                    replyingToUsername = parentComment.user.username;
+
+                    const replyingToReply = parentComment.replies.find(reply => reply.id === replyTo)
+                    if (replyingToReply) {
+                        replyingToUsername = replyingToReply.user.username
+                    }
+
+
+                    /* const replyingToComment = parentComment.replies.find(reply => reply.id === parentId)
+
+                    if (replyingToComment) {
+                        replyingToUsername = replyingToComment.user.username
+                    } */
+
+                }
+                /* const replyingToUsername = parentId ? comments.find(comment => comment.id === parentId).user.username : null; */
+
+            }
 
             const newCommentData = {
                 id: Date.now(),
                 content: content,
                 createdAt: "just now",
                 score: 0,
-                replyingTo: "user",
+                replyingTo: (replyingToUsername !== currentUser.username) ? replyingToUsername : "me",
                 user: {
                     image: { png: replyAvatar },
-                    username: "juliusomo"
+                    username: currentUser.username
                 },
                 replies: []
             };
@@ -95,14 +114,18 @@ const CommentSection = () => {
                         if (comment.id === parentId) {
                             return {
                                 ...comment,
-                                replies: [...comment.replies, newCommentData]
+                                replies: [
+                                    ...comment.replies.filter(reply => reply.id !== parentId), newCommentData
+                                ]
                             }
                         }
                         return comment;
                     })
                 }
                 return [...prev, newCommentData];
+
             });
+
             setReplyTo(false)
         }
 
@@ -129,27 +152,38 @@ const CommentSection = () => {
     const handleClickOutside = (e) => {
         if (replyRef.current && !replyRef.current.contains(e.target)) {
             setReplyTo(false);
-            console.log("clickoutside")
+
         }
     };
     useEffect(() => {
         document.addEventListener("mouseup", handleClickOutside);
-        console.log("added");
+
         return () => {
             document.removeEventListener("mouseup", handleClickOutside);
-            console.log("removed");
+
 
         }
     }, [])
 
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        setIsVisible(true);
+        const timer = setTimeout(() => {
+            setIsVisible(false);
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
 
     return (
         <>
-            <header className="flex justify-between dark:bg-slate-950 mx-auto w-full">
-                <div className="rounded-md bg-moderate-blue w-[130px] text-center py-1 mt-3">
+            <header className="flex justify-between dark:bg-slate-950 mx-[13px] w-[350px] md:w-[700px] items-center pt-4 md:pb-2">
+                <div className="rounded-md bg-moderate-blue w-[130px] text-center py-1">
                     <p className="text-white font-semibold"><a href="https://www.frontendmentor.io/challenges/interactive-comments-section-iG1RugEG9" title="Go to Challenge" target="_blank">SocialLink App</a> </p>
                 </div>
-                <div className="flex gap-x-4 items-center ">
+                <div className="flex gap-x-4 items-center  justify-between">
                     <div className="flex text-slate-950 dark:text-white font-bold gap-x-4">
 
                         <p><a href="https://github.com/gerajaj" target="_blank" title="Visit my Github profile">About</a></p>
@@ -190,7 +224,7 @@ const CommentSection = () => {
                                     <div className="flex ">
                                         <div className="mt-4"
                                         >
-                                            {comment.user.username === currentUser.username && hoverId === "juliusomo" && (
+                                            {comment.user.username === currentUser.username && hoverId === currentUser.username && (
 
                                                 <DeleteComments onDelete={() => handleDeleteComment(comment.id)} />
 
@@ -238,8 +272,8 @@ const CommentSection = () => {
                                                         <div className="flex items-center justify-between  gap-x-4">
                                                             <img src={reply.user.image.png} alt="user" className="w-8 h-8" />
                                                             <p className="text-moderate-blue font-bold">{reply.user.username}</p>
-                                                            {reply.user.username === "juliusomo" &&
-                                                                <div className="text-white bg-moderate-blue w-9 rounded-md">
+                                                            {reply.user.username === currentUser.username && isVisible &&
+                                                                <div className="text-white bg-moderate-blue w-9 rounded-md animate-pulse duration-5000 ease-in-out ">
                                                                     <p className="text-center">You</p>
                                                                 </div>}
                                                             <p className="text-grayish-blue text-sm mr-auto mt-[1px]">{reply.createdAt}</p>
