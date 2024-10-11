@@ -13,14 +13,14 @@ const CommentReply = ({ replyAvatar, onSend, isReply, parentId }) => {
 
     return (
         <div className="grid pt-4 mt-4 order-2">
-            <form action="" className="flex items-center justify-center w-50">
+            <form action="" className="flex items-center justify-center w-[100%] mx-auto">
                 <textarea
                     name=""
                     id="reply"
                     value={addNewComment}
                     onChange={(e) => setAddNewComment(e.target.value)}
                     placeholder="Write here..."
-                    className="border border-1 border-gray-400 rounded-md w-[90%] md:w-[95%] focus:outline-none resize-none px-2 py-1"> </textarea>
+                    className="border border-1 border-gray-400 rounded-md w-[90%] md:w-[95%] focus:outline-none resize-none px-2 py-1 overflow-auto"> </textarea>
             </form>
             <div className="flex items-center justify-between mx-4 mt-4 pb-4">
 

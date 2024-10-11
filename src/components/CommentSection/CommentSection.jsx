@@ -2,13 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import commentsData from "@/components/CommentSection/data.json";
 
 import IconReply from "@/components/icons/iconReply.jsx"
-import IconSun from "@/components/icons/IconSun.png"
-import IconMoon from "@/components/icons/IconMoon.png"
 
 import ScoreComment from "@/components/CommentSection/ScoreComment.jsx";
 import CommentReply from "./CommentReply";
 import DeleteComments from "./DeleteComments";
-
+import CommentHeader from "./CommentHeader";
 
 const CommentSection = () => {
     const [comments, setComments] = useState([]);
@@ -17,7 +15,6 @@ const CommentSection = () => {
     const [replyTo, setReplyTo] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const replyRef = useRef(null);
-
 
     const [theme, setTheme] = useState(() => {
         if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -30,13 +27,12 @@ const CommentSection = () => {
             document.querySelector("html").classList.add("dark")
         } else {
             document.querySelector("html").classList.remove("dark")
-
         }
     }, [theme]);
+
     const handleChangeTheme = () => {
         setTheme(prevTheme => prevTheme === "light" ? "dark" : "light")
     };
-
 
     useEffect(() => {
         setComments(commentsData.comments);
@@ -60,10 +56,8 @@ const CommentSection = () => {
         setCount((prev) => ({
             ...prev, [id]: Math.max((prev[id] || 0) - 1, 0)
         }))
-
     }
-    /* const mainAvatar = comments.flatMap(comment => comment.replies).find(reply => reply.id === 4) 
-    const replyAvatar = mainAvatar ? mainAvatar.user.image.png : " rounder-full border"*/
+
     const replyAvatar = currentUser ? currentUser.image.png : " rounder-full border"
 
     const addComment = (content, parentId) => {
@@ -82,18 +76,8 @@ const CommentSection = () => {
                     if (replyingToReply) {
                         replyingToUsername = replyingToReply.user.username
                     }
-
-
-                    /* const replyingToComment = parentComment.replies.find(reply => reply.id === parentId)
-
-                    if (replyingToComment) {
-                        replyingToUsername = replyingToComment.user.username
-                    } */
-
                 }
-                /* const replyingToUsername = parentId ? comments.find(comment => comment.id === parentId).user.username : null; */
-
-            }
+            };
 
             const newCommentData = {
                 id: Date.now(),
@@ -123,31 +107,41 @@ const CommentSection = () => {
                     })
                 }
                 return [...prev, newCommentData];
-
             });
-
             setReplyTo(false)
         }
-
-
     }
-
+    //Deleting comments and error manage
     const handleDeleteComment = (id) => {
-        setComments(prev => prev.filter(comment => comment.id !== id));
+        try {
+
+            setComments(prev => prev.filter(comment => comment.id !== id));
+        } catch (error) {
+            console.error("Error deleting comment:", error);
+        }
     };
+    //Deleting replies
     const handleDeleteReply = (commentId, replyId) => {
-        setComments(prev => {
-            return prev.map(comment => {
-                if (comment.id === commentId) {
-                    return {
-                        ...comment,
-                        replies: comment.replies.filter(reply => reply.id !== replyId)
+        try {
+
+            setComments(prev => {
+                return prev.map(comment => {
+                    if (comment.id === commentId) {
+                        return {
+                            ...comment,
+                            replies: comment.replies.filter(reply => reply.id !== replyId)
+                        }
                     }
-                }
-                return comment;
+                    return comment;
+                })
             })
-        })
+        } catch (error) {
+            console.error("Error deleting reply:", error);
+        }
     };
+
+    /* 
+    If mouseup commentReply closes
 
     const handleClickOutside = (e) => {
         if (replyRef.current && !replyRef.current.contains(e.target)) {
@@ -157,13 +151,10 @@ const CommentSection = () => {
     };
     useEffect(() => {
         document.addEventListener("mouseup", handleClickOutside);
-
         return () => {
             document.removeEventListener("mouseup", handleClickOutside);
-
-
         }
-    }, [])
+    }, []) */
 
     const [isVisible, setIsVisible] = useState(true);
 
@@ -172,28 +163,12 @@ const CommentSection = () => {
         const timer = setTimeout(() => {
             setIsVisible(false);
         }, 5000);
-
         return () => clearTimeout(timer);
     }, []);
 
-
     return (
         <>
-            <header className="flex justify-between dark:bg-slate-950 mx-[13px] w-[350px] md:w-[700px] items-center pt-4 md:pb-2">
-                <div className="rounded-md bg-moderate-blue w-[130px] text-center py-1">
-                    <p className="text-white font-semibold"><a href="https://www.frontendmentor.io/challenges/interactive-comments-section-iG1RugEG9" title="Go to Challenge" target="_blank">SocialLink App</a> </p>
-                </div>
-                <div className="flex gap-x-4 items-center  justify-between">
-                    <div className="flex text-slate-950 dark:text-white font-bold gap-x-4">
-
-                        <p><a href="https://github.com/gerajaj" target="_blank" title="Visit my Github profile">About</a></p>
-                        <p className=""><a href="https://github.com/gerajaj/comments-section-react-tailwindcss" target="_blank" title="Go to Repository">Repo</a></p>
-                    </div>
-                    <button onClick={handleChangeTheme} title="Change theme">
-                        {theme === "dark" ? (<img src={IconSun} className="h-6 mx-auto fill-bold rounded-full" />) : (<img src={IconMoon} className="h-6 mx-auto fill-bold" />)}
-                    </button>
-                </div>
-            </header>
+            <CommentHeader handleChangeTheme={handleChangeTheme} theme={theme} />
             <hr className="hidden md:flex h-[2px] bg-slate-500 opacity-50 md:w-[700px] mt-2 -mb-2 mx-auto" />
             {comments.map(comment => (
                 <div key={comment.id} className="dark:bg-slate-950">
@@ -207,41 +182,32 @@ const CommentSection = () => {
                                     <p className="text-moderate-blue font-bold">{comment.user.username}</p>
                                     <p className="text-grayish-blue text-sm mr-auto mt-[1px]">{comment.createdAt}</p>
                                 </div>
-                                <p className="text-grayish-blue mt-2">
+                                <p id="newComment" className="text-grayish-blue mt-2 text-pretty break-words">
                                     {comment.content}
                                 </p>
                                 <div className="flex justify-between items-center">
                                     <div className="bg-light-gray h-8 w-[95px] mt-4 rounded-lg">
-
                                         <ScoreComment
                                             count={count}
                                             id={comment.id}
                                             handleMinus={handleMinus}
                                             handlePlus={handlePlus}
                                         />
-
                                     </div>
                                     <div className="flex ">
-                                        <div className="mt-4"
-                                        >
+                                        <div className="mt-4">
                                             {comment.user.username === currentUser.username && hoverId === currentUser.username && (
-
                                                 <DeleteComments onDelete={() => handleDeleteComment(comment.id)} />
-
-
-
                                             )}
                                         </div>
                                         <div className="mt-4 flex items-center "
-                                            onClick={() => setReplyTo(comment.id)}
+                                            onClick={() => setReplyTo(prev => (prev === comment.id ? false : comment.id))}
                                         >
                                             <IconReply className="fill-moderate-blue w-5 cursor-pointer" />
                                             <p className="text-moderate-blue font-bold cursor-pointer">Reply</p>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -253,7 +219,6 @@ const CommentSection = () => {
                             </div>
                         </span>
                     )
-
                     }
                     {comment.replies.length > 0 && (
 
@@ -265,7 +230,7 @@ const CommentSection = () => {
                                         <div key={reply.id} className="flex mx-4  items-center justify-between ">
                                             {/* <hr className=" bg-gray-300 w-[1px] min-h-[240px] " /> */}
                                             <span className=" bg-gray-300 w-[1px] min-h-[160px] md:-ml-2">
-                                                <div className="bg-white min-h-[160px] md:min-h-[160px] w-[330px] md:w-[600px] rounded-xl my-4 mb-1 ml-4 md:ml-[90px]">
+                                                <div className="bg-white min-h-[140px] md:min-h-[160px] w-[330px] md:w-[600px] rounded-xl my-4 mb-1 ml-4 md:ml-[90px]">
                                                     <div className="pt-4 pb-4 mx-4 "
                                                         onMouseEnter={() => setHoverId(reply.id)}
                                                         onMouseLeave={() => setHoverId(null)}>
@@ -280,7 +245,7 @@ const CommentSection = () => {
 
 
                                                         </div>
-                                                        <p className="text-grayish-blue mt-2">
+                                                        <p id="newReply" className="text-grayish-blue mt-2 text-pretty break-words">
                                                             <span className="text-moderate-blue font-medium">@{reply.replyingTo}</span> {reply.content}
                                                         </p>
                                                         <div className="flex justify-between items-center">
@@ -296,12 +261,8 @@ const CommentSection = () => {
                                                                 {reply.user.username === currentUser.username && hoverId === reply.id && (
 
                                                                     <DeleteComments onDelete={() => handleDeleteReply(comment.id, reply.id)} />
-
-
-
                                                                 )}
-                                                                <div className="flex items-center" onClick={() => setReplyTo(reply.id)}>
-
+                                                                <div className="flex items-center" onClick={() => setReplyTo((prev => (prev === reply.id ? false : reply.id)))}>
                                                                     <IconReply className="fill-moderate-blue w-5 cursor-pointer" />
                                                                     <p className="text-moderate-blue font-bold cursor-pointer">Reply</p>
                                                                 </div>
@@ -323,20 +284,14 @@ const CommentSection = () => {
                                                 )}
                                             </span>
                                         </div>
-
                                     </div>
-
                                 ))}
                         </div>
                     )}
-
                 </div >
-
             ))
-
             }
-
-            <div className="flex flex-col bg-white justify-center rounded-lg h-[160px] mx-auto w-[355px] md:w-[700px] my-1">
+            <div className="flex flex-col bg-white justify-center rounded-lg h-[160px] mx-auto w-[355px] md:w-[700px] my-1 ">
                 <CommentReply
                     replyAvatar={replyAvatar}
                     id="replyComment"
@@ -346,7 +301,7 @@ const CommentSection = () => {
                 />
             </div>
         </>
-    )
-}
+    );
+};
 
 export default CommentSection;

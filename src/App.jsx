@@ -1,13 +1,4 @@
-
-import CommentSection from "./components/CommentSection/CommentSection.jsx"
-
-/* 
-Primero vamos a terminar la tarjeta 
-Después vamos a crear la caja de comentarios
-Más adelante vamos a hacer lo del JSON
-Vamos a programar los botones de reply, delete y el contador
-Y al fina vamos a afinar detalles
-*/
+import CommentSection from "./components/CommentSection/CommentSection.jsx";
 
 const App = () => {
     return (
